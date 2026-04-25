@@ -1,0 +1,14 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      // Depura o seu Servidor HTTP (Onde ocorre o processamento)
+      "name": "Deno: Debug Server",
+      "request": "launch",
+      "type": "deno",
+      "program": "./server.ts", // Altere para seu arquivo do servidor
+      // Permissões necessárias para rodar o servidor
+      "args": ["--allow-net", "--allow-read", "--allow-write"] 
+    }
+  ]
+}

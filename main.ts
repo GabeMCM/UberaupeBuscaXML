@@ -1,14 +1,37 @@
 import { lerArquivoXml } from "./lerArquivoXml.ts";
-import { inserirNaNFoCodigoInterno } from "./inserirNaNFoCodigoInterno.ts";
-import { inserirNaNFDetalhesDaMercadoria } from "./inserirNaNFDetalhesDaMercadoria.ts"
+import { processarNFeEConsultarDB } from "./inserirNaNFoCodigoInterno.ts";
+import { buscarDetalhesMercadoria } from "./inserirNaNFDetalhesDaMercadoria.ts";
+import { gerarTabelaHTML } from "./gerarTabela.ts";
+import { NFeFinal, NFeSimplificada } from "./interfaces.ts";
 
-const XML_FILE_PATH = "35251004949853000125550010005416121486188965-nfe (1).xml"; 
-
-try {
-    const arquivo_xml = await lerArquivoXml(XML_FILE_PATH);
-    const arquivo_com_cod = await inserirNaNFoCodigoInterno(arquivo_xml as string);
-    const resultado_completo = await inserirNaNFDetalhesDaMercadoria(arquivo_com_cod as string);
-    console.log(resultado_completo)
-} catch (error) {
-    throw new Error(`Erro: ${error}`);
+export async function processarXMLInterno(xmlContent: string): Promise<object> {
+  try {
+    const arquivo_xml = await lerArquivoXml(xmlContent);
+    console.log("Arquivo XML lido e processado:", arquivo_xml);
+    if (arquivo_xml === null) {
+      throw new Error(
+        "Erro na leitura/parse do XML. Verifique o console de Deno."
+      );
+    }
+    const arquivo_xml_path = arquivo_xml.OUTPUT_FILE_PATH;
+    console.log("Caminho do arquivo XML processado:", arquivo_xml_path);
+    const arquivo_com_cod = await processarNFeEConsultarDB(
+      arquivo_xml_path as string
+    );
+    console.log("Arquivo com códigos internos processado:", arquivo_com_cod);
+    const resultado_completo = await buscarDetalhesMercadoria(
+      arquivo_com_cod as NFeSimplificada
+    );
+    console.log(
+      "Resultado completo com detalhes da mercadoria:",
+      resultado_completo
+    );
+    const gerar_tabela = await gerarTabelaHTML(resultado_completo as NFeFinal);
+    return {
+      tabela: gerar_tabela,
+      numNfe: arquivo_xml.numNfe,
+    };
+  } catch (error) {
+    throw new Error(`Erro ao processar XML: ${error}`);
+  }
 }

@@ -3,14 +3,15 @@ import {
     XmlNFeRaw, 
     XmlItemRaw,  
     ProdutoSimplificado, 
-    NFeSimplificada 
+    NFeSimplificada,
+    NFeInfoRetorno
 } from "./interfaces.ts";
 
 /** 
  * Mapeia o objeto XML parseado para a estrutura JSON simplificada desejada.
  * @param xmlObject Objeto JavaScript resultante da função parse() do XML, tipado como XmlNFeRaw.
  */
-function mapearXmlParaJsonSimplificada(xmlObject: XmlNFeRaw | object): NFeSimplificada {
+export function mapearXmlParaJsonSimplificada(xmlObject: XmlNFeRaw | object): NFeSimplificada {
     
     // Type Guard para verificar se a estrutura que precisamos existe
     if (!('nfeProc' in xmlObject)) {
@@ -76,25 +77,23 @@ function mapearXmlParaJsonSimplificada(xmlObject: XmlNFeRaw | object): NFeSimpli
 }
 // --- Funções de Leitura e Execução ---
 
-const OUTPUT_FILE_PATH = "./nfe_simplificada.json";
+//const OUTPUT_FILE_PATH = "./nfe_simplificada.json";
 
-export async function lerArquivoXml(XML_FILE_PATH: string): Promise<string | unknown> {
+export function lerArquivoXml(xmlContent: string): Promise<NFeInfoRetorno | null> {
   try {
-    const xmlString = await Deno.readTextFile(XML_FILE_PATH);
-    console.log(`✅ Arquivo XML "${XML_FILE_PATH}" lido com sucesso.`);
-    
-    const xmlObject = parse(xmlString);
-    console.log(typeof(xmlObject))
+    const xmlObject = parse(xmlContent);
     const saidaFinal = mapearXmlParaJsonSimplificada(xmlObject);
-    
     const jsonOutputString = JSON.stringify(saidaFinal, null, 2);
 
-    await Deno.writeTextFile(OUTPUT_FILE_PATH, jsonOutputString);
-
-    console.log(`\n🎉 Saída JSON final salva em: ${OUTPUT_FILE_PATH}`);
-    return OUTPUT_FILE_PATH
+    //await Deno.writeTextFile(OUTPUT_FILE_PATH, jsonOutputString);
+    
+    return Promise.resolve({
+      OUTPUT_FILE_PATH: jsonOutputString,
+      numNfe: saidaFinal.nfeProc.NFe.infNFe.ide.nNF
+    });
    
   } catch (error) {
     console.error(`❌ Ocorreu um erro ao processar o XML:`, error);
+    return Promise.resolve(null);
   }
 }

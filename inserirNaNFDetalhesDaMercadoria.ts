@@ -1,5 +1,5 @@
 import { Client } from "@mysql/client";
-import { NFeFinal } from "./interfaces.ts";
+import { NFeFinal, NFeSimplificada } from "./interfaces.ts";
 import { config } from "./configs.ts";
 
 const database = "01trab"
@@ -12,16 +12,14 @@ const database = "01trab"
  * Carrega a NF-e final, consulta a tabela 'cadmer' com base no codIntLoja 
  * e insere as informações detalhadas da mercadoria nos itens.
  */
-async function buscarDetalhesMercadoria(nfeFinalPath: string): Promise<NFeFinal | null> {
+export async function buscarDetalhesMercadoria(nfeContentComCod: NFeSimplificada): Promise<NFeFinal | null> {
   let client: Client | null = null;
   
   try {
     // ------------------------------------
     // PARTE A: CARREGAR NFE FINAL
     // ------------------------------------
-    const jsonString = await Deno.readTextFile(nfeFinalPath);
-    const nfeAtualizada: NFeFinal = JSON.parse(jsonString);
-    console.log(`✅ NF-e final carregada de: ${nfeFinalPath}`);
+    const nfeAtualizada: NFeFinal = nfeContentComCod;
 
     const itensNFe = nfeAtualizada.nfeProc.NFe.infNFe.det;
     
@@ -102,21 +100,4 @@ async function buscarDetalhesMercadoria(nfeFinalPath: string): Promise<NFeFinal 
   }
 }
 
-// -------------------------------------------------------------------------
-// 3. EXECUÇÃO
-// -------------------------------------------------------------------------
 
-const NFE_OUTPUT_FILE = "./nfe_com_detalhes.json"; 
-
-export async function inserirNaNFDetalhesDaMercadoria(NFE_INPUT_FILE: string): Promise<string | unknown> {
-    const nfeFinal = await buscarDetalhesMercadoria(NFE_INPUT_FILE);
-
-    if (nfeFinal) {
-        // Opcional: Salvar a NF-e final em um novo arquivo para verificação
-        await Deno.writeTextFile(NFE_OUTPUT_FILE, JSON.stringify(nfeFinal, null, 2));
-        console.log(`\n💾 NF-e final com detalhes da mercadoria salva em: ${NFE_OUTPUT_FILE}`);
-        return NFE_OUTPUT_FILE;
-    } else {
-        console.log("\nProcessamento de busca de detalhes falhou.");
-    }
-}

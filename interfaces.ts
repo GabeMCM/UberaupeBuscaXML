@@ -93,12 +93,12 @@ export interface NFeSimplificada {
 // Usa Intersection Type (&) para estender a interface ProdutoSimplificado
 export interface ProdutoCompleto extends ProdutoSimplificado {
   prod: ProdutoSimplificado['prod'] & {
-    cod: string;
-    nome: string;
-    un: string;
-    compl: string;
-    local: string;
-    local2: string;
+    cod?: string;
+    nome?: string;
+    un?: string;
+    compl?: string;
+    local?: string;
+    local2?: string;
   };
 }
 
@@ -116,4 +116,9 @@ export interface NFeFinal {
       };
     };
   };
+}
+
+export interface NFeInfoRetorno {
+    OUTPUT_FILE_PATH: string;
+    numNfe: number; 
 }
